@@ -106,7 +106,8 @@ snake_collection = db["snake"]
 admin_collection = db["admin"]
 
 # ✅ โหลดโมเดล PyTorch
-MODEL_PATH = r"C:\Users\SURFACE PRO X SQ1\project\backend\resnet18_trained.pth"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "resnet18_trained.pth")
 
 # ✅ สร้างโมเดล ResNet18
 model = models.resnet18(weights=None)  # ใช้ weights=None ถ้าคุณไม่ต้องการโหลด weights เริ่มต้น
