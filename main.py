@@ -100,7 +100,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 # ✅ เชื่อมต่อ MongoDB
 MONGO_URI = os.getenv("MONGO_URI")
 client = AsyncIOMotorClient(MONGO_URI)
-db = client.get_database()  # เข้าถึงฐานข้อมูลโดยใช้ชื่อที่ตั้งใน URI
+db = client["snake"]  # เข้าถึงฐานข้อมูลโดยใช้ชื่อที่ตั้งใน URI
 
 snake_collection = db["snake"]    
 admin_collection = db["admin"]
