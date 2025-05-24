@@ -290,9 +290,19 @@ async def get_snake(search: str = Query(None, description = "ค้นหาง�
     except Exception as e:
         print(f"🔥 Error: {e}")
         return {"error": str(e)}
-    
-# ✅ ดึงข้อมูลงูจาก MongoDB
+
 @app.get("/snake")
+async def get_snake():
+    try:
+        # ทดลองเชื่อมต่อแล้วนับจำนวน document แทน
+        count = await snake_collection.count_documents({})
+        return {"count": count}
+    except Exception as e:
+        print(f"🔥 Error: {e}")
+        return {"error": str(e)}
+
+# ✅ ดึงข้อมูลงูจาก MongoDB
+@app.get("/snakes")
 async def get_snake():
     try:
         snakes_cursor = snake_collection.find({})
