@@ -34,7 +34,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000",
-                   "http://localhost:5173"],  # อนุญาต React ที่รันบน localhost:3000
+                   "http://localhost:5173",
+                  "https://<your-vercel-domain>.vercel.app"],  # อนุญาต React ที่รันบน localhost:3000
     allow_credentials=True,
     allow_methods=["*"],  # อนุญาตทุก Method (GET, POST, PUT, DELETE)
     allow_headers=["*"],
