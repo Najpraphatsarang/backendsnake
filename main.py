@@ -33,9 +33,7 @@ app = FastAPI()
 # ✅ อนุญาตให้ frontend เรียก API ได้
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000",
-                   "http://localhost:5173",
-                  "https://fontendsnake.vercel.app"],  # อนุญาต React ที่รันบน localhost:3000
+    allow_origins=["*"],  # อนุญาต React ที่รันบน localhost:3000
     allow_credentials=True,
     allow_methods=["*"],  # อนุญาตทุก Method (GET, POST, PUT, DELETE)
     allow_headers=["*"],
@@ -108,11 +106,11 @@ admin_collection = db["admin"]
 
 # ✅ โหลดโมเดล PyTorch
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "resnet18_trained.pth")
+MODEL_PATH = os.path.join(BASE_DIR, r"C:\Users\SURFACE PRO X SQ1\project\backend\resnet18_fold5.pth")
 
 # ✅ สร้างโมเดล ResNet18
 model = models.resnet18(weights=None)  # ใช้ weights=None ถ้าคุณไม่ต้องการโหลด weights เริ่มต้น
-num_classes = 6  # ปรับจำนวนคลาสให้ตรงกับโมเดล
+num_classes = 7  # ปรับจำนวนคลาสให้ตรงกับโมเดล
 model.fc = nn.Linear(model.fc.in_features, num_classes)  # ปรับชั้นสุดท้าย
 
 # ✅ โหลดโมเดลที่บันทึกไว้
@@ -128,6 +126,7 @@ CLASS_NAMES = [
     'Naja atra',
     'Ophiophagus hannah',
     'Psammodynastes pulverulentus',
+    "Python molurus",
     'Tropidolaemus wagleri',
     'Xenochrophis piscator'
 ]
@@ -363,51 +362,51 @@ async def reset_password(request: ResetPasswordRequest):
 
 # ✅ อัพโหลดภาพแล้วทำนายงู
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
+async def predict_image(file: UploadFile = File(...)):
     try:
-        # อ่านไฟล์รูป
+        if not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="ไฟล์ไม่ใช่รูปภาพ")
+
         contents = await file.read()
-        print(f"📸 Received file: {file.filename}, Size: {len(contents)} bytes")
-
-        # แปลงภาพเป็น Tensor
         image = Image.open(BytesIO(contents)).convert("RGB")
-        img_tensor = transform_image(image)
+        tensor = transform_image(image)
 
-        # ทำนายผล
         with torch.no_grad():
-            predictions = model(img_tensor)
-            probabilities = torch.nn.functional.softmax(predictions[0], dim=0)
-            predicted_class = CLASS_NAMES[torch.argmax(probabilities).item()]
-            confidence = probabilities.max().item()
+            outputs = model(tensor)
+            probabilities = torch.nn.functional.softmax(outputs, dim=1)
+            predicted_class_index = torch.argmax(probabilities, dim=1).item()
+            predicted_class = CLASS_NAMES[predicted_class_index]
+            confidence = float(probabilities[0][predicted_class_index]) * 100
 
-        # ดึงข้อมูลงูจาก MongoDB
-        snake_data = await snake_collection.find_one({"binomial": predicted_class}, {"_id": 0})
+        # 🔍 ค้นหาใน MongoDB
+        snake = await snake_collection.find_one({"binomial": predicted_class})
 
-        # แปลงภาพเป็น base64 สำหรับ frontend แสดงผล
-        buffered = BytesIO()
-        image.save(buffered, format="JPEG")
-        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        img_data_url = f"data:image/jpeg;base64,{img_str}"
+        if not snake:
+            return {
+                "filename": file.filename,
+                "predicted_class": predicted_class,
+                "class_index": predicted_class_index,
+                "confidence": round(confidence, 2),
+                "message": "ไม่พบข้อมูลในฐานข้อมูล"
+            }
 
-        # Response
-        result = {
+        return {
+            "filename": file.filename,
             "predicted_class": predicted_class,
-            "confidence": confidence,
-            "uploaded_image": img_data_url  # << เพิ่มส่วนนี้!
+            "class_index": predicted_class_index,
+            "confidence": round(confidence, 2),
+            "snake_info": {
+                "thai_name": snake.get("thai_name", ""),
+                "is_venomous": snake.get("is_venomous"),
+                # "is_venomous": "พิษ" if snake.get("is_venomous") else "ไม่มีพิษ",
+                "imageUrl": snake.get("imageUrl", ""),
+                "first_aid": snake.get("first_aid", [])
+            }
         }
 
-        if snake_data:
-            result["snake_info"] = snake_data
-        else:
-            result["message"] = "⚠️ ไม่พบข้อมูลในฐานข้อมูล"
-
-        return result
-
     except Exception as e:
-        print(f"🔥 Error: {e}")
-        return {"error": str(e)}
-
-
+        print(f"🔥 Error during prediction: {e}")
+        raise HTTPException(status_code=500, detail="❗เกิดข้อผิดพลาดระหว่างการทำนาย")
 
 # ✅ รันเซิร์ฟเวอร์
 if __name__ == "__main__":
