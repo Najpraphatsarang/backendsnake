@@ -109,7 +109,7 @@ admin_collection = db["admin"]
 
 # ✅ โหลดโมเดล PyTorch
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, r"C:\Users\SURFACE PRO X SQ1\project\backend\resnet18_fold5.pth")
+MODEL_PATH = os.path.join("resnet18_fold5.pth")
 
 # ✅ สร้างโมเดล ResNet18
 model = models.resnet18(weights=None)  # ใช้ weights=None ถ้าคุณไม่ต้องการโหลด weights เริ่มต้น
