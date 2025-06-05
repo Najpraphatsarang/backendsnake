@@ -73,7 +73,7 @@ class Snake(BaseModel):
     poisonous: Optional[str] = None
     color: List[str]
     diet: List[str]
-    first_aid: List[str]
+    first_aid: Optional[List[str]] = None  # ถ้าจะให้ optional
     status: str
     habitat: List[str]
     pattern: Optional[str] = None
@@ -97,7 +97,6 @@ class SnakeUpdate(BaseModel):
     venom_effects: Optional[str] = None
     imageUrl: Optional[str] = None
     first_aid: Optional[List[str]] = None
-
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
