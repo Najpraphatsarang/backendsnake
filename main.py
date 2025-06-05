@@ -73,7 +73,7 @@ class Snake(BaseModel):
     poisonous: Optional[str] = None
     color: List[str]
     diet: List[str]
-    first: List[str]
+    first_aid: List[str]
     status: str
     habitat: List[str]
     pattern: Optional[str] = None
@@ -96,7 +96,7 @@ class SnakeUpdate(BaseModel):
     size: Optional[str] = None
     venom_effects: Optional[str] = None
     imageUrl: Optional[str] = None
-    first: Optional[List[str]] = None
+    first_aid: Optional[List[str]] = None
 
 
 SECRET_KEY = os.getenv("SECRET_KEY")
