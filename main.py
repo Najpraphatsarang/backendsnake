@@ -36,7 +36,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
-        "https://fontendsnake.vercel.app"
+        "https://fontendsnake.vercel.app",
+        "https://admin-tawny-gamma.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
