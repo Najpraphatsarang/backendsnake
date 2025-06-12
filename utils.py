@@ -32,7 +32,7 @@ def hash_password(password: str):
     return pwd_context.hash(password)
 
 async def send_reset_email(to_email: str, token: str):
-    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "https://backendsnake.onrender.com")
     reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
 
 
